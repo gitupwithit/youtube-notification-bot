@@ -23,7 +23,8 @@
   "homepage": "https://github.com/Snowflake07/youtube-notification-bot#readme",
   "dependencies": {
     "discord.js": "^12.0.2",
-    "quick.db": "^7.0.0-b22",
+    "express": "^4.17.1",
+    "quick.db": "^7.1.3",
     "rss-parser": "^3.7.5"
   }
 }
