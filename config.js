@@ -7,9 +7,8 @@ module.exports = {
     token: mySecret,
     channel: "893873193616539651",
     channel2: "730533183048908912",
-    messageTemplate: "**{author}** just now uploaded a video **{title}**!\n{url}!",
     channel_id: "UCVQGtUcRjHTQLTTu-5s9_4Q", // Brew
     channel_id2: "UC_Vl1oLTGjWYJLmbTpaqorQ", // Spill
     channel_id3: "UC5zkKHfavEDoVW703JVs7Yg", // On The Hill
-    watchInterval: 3000
+    watchInterval: 300000
 }
