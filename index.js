@@ -8,166 +8,181 @@
 // flavour text randomization
 
 const Discord = require("discord.js");
-const client = new Discord.Client();
-client.request = new (require("rss-parser"))();
-client.config = require("./config.js");
+const Jack = new Discord.Client();
+Jack.request = new (require("rss-parser"))();
+Jack.config = require("./config.js");
+const d_channel_1 = process.env['d_channel_1']
+const d_channel_2 = process.env['d_channel_2']
 const keepAlive = require("./server.js");
 const latest_episodes = require("./latest_episodes.json")
+const cron = require('node-cron');
 
 const brew_salutations = [
-  " ",
-  " "
+  "No mystery is to great for this guy! ",
+  "Mystery time guys! ",
+  "He's great! "
 ]
 
 const spill_salutations = [
-  " ",
-  " "
+  "Drama Alert! Drama Alert! ",
+  "It's about to get heated! ",
+  "Spill knows all the drams. ",
+  "Forget KeemStarr! "
 ]
 
 const oth_salutations = [
-  " ",
-  " "
+  "Yes! ",
+  "Finally one with ME in it! ",
+  "I hope they didn't edit me out again. "
 ]
 
 // Brew
 
-function handleUploads() {
+function checkBrew() {
   console.log("brew vids")
-  //setInterval(() => {
-    let channel = client.channels.cache.get(client.config.channel)
-    let channel2 = client.channels.cache.get(client.config.channel2)
-    client.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${client.config.channel_id}`)
-    .then(data => {
-      const fs = require('fs')
-      fs.readFile('latest_episodes.json', (err, data2) => {
-      if (err) throw err
-      let episodes = JSON.parse(data2)
-      if(episodes[0]["brew"] != data.items[0].title) {
-        episodes[0]["brew"] = data.items[0].title
-        let data3 = JSON.stringify(episodes, null, 2);
-        fs.writeFile('latest_episodes.json', data3, (err) => {
-        if (err) throw err;
-        console.log('Brew data written to file');
+  Jack.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${Jack.config.channel_id}`)
+  .then(data => {
+    const fs = require('fs')
+    fs.readFile('latest_episodes.json', (err, data2) => {
+    if (err) throw err
+    let episodes = JSON.parse(data2)
+    let episode_title = data.items[0].title
+    let filtered_episode_title = episode_title.replace(/[\W_]/g, '')
+    if(episodes[0]["brew"] != filtered_episode_title) {
+      episodes[0]["brew"] = filtered_episode_title
+      let data3 = JSON.stringify(episodes, null, 2);
+      fs.writeFile('latest_episodes.json', data3, (err) => {
+      if (err) throw err;
+      console.log(data3)
+      console.log('Brew data written to file');
 
-        let auth = data.items[0].author
-        let link = data.items[0].link
-        let title = data.items[0].title
-        if (!channel || !channel2) {
-          console.log("no channels to send to")
-          return;
-        }
-
-        let message = "Huzzah! " + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
-        channel.send(message)
-        channel2.send(message)
-        console.log(message)
-        })
-      } else {
-        console.log("repeat Brew episode")
+      let auth = data.items[0].author
+      let link = data.items[0].link
+      let title = data.items[0].title
+      if (!d_channel_1 || !d_channel_2) {
+        console.log("no channels to send to")
+        return;
       }
-    })
-    });
-  //}, client.config.watchInterval);
+
+      let random_number = Math.floor(Math.random() * brew_salutations.length)
+
+      let message = brew_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
+      Jack.channels.cache.get(d_channel_1).send(message)
+      Jack.channels.cache.get(d_channel_2).send(message)
+      console.log(message)
+      })
+    } else {
+      console.log("repeat Brew episode")
+    }
+  })
+  });
 }
 
 // Spill
 
-function handleUploads2() {
+function checkSpill() {
   console.log("spill vids")
-  //setInterval(() => {
-    let channel = client.channels.cache.get(client.config.channel)
-    let channel2 = client.channels.cache.get(client.config.channel2)
-    client.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${client.config.channel_id2}`)
-    .then(data => {
-      const fs = require('fs')
-      fs.readFile('latest_episodes.json', (err, data2) => {
-      if (err) throw err
-      let episodes = JSON.parse(data2)
-      let episode_title = data.items[0].title
-      let filtered_episode_title = episode_title.replace(/[\W_]/g, '')
-      if(episodes[0]["spill"] != filtered_episode_title) {
-        episodes[0]["spill"] = filtered_episode_title
-        let data3 = JSON.stringify(episodes, null, 2);
-        fs.writeFile('latest_episodes.json', data3, (err) => {
-        if (err) throw err;
-        console.log(data3)
-        console.log('Spill data written to file');
-
-        let auth = data.items[0].author
-        let link = data.items[0].link
-        let title = data.items[0].title
-
-        if (!channel || !channel2) {
-          console.log("no channels to send to")
-          return;
-        }
-
-        let message = "Huzzah! " + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
-
-        channel.send(message)
-        channel2.send(message)
-        console.log(message)
-        })
-      } else {
-        console.log("repeat Spill episode")
-      }
-    })
-    });
-    handleUploads()
-  //}, client.config.watchInterval);
-}
-
-// On The Hill
-
-function handleUploads3() {
-  console.log("OTH vids")
-  setInterval(() => {
-    let channel = client.channels.cache.get(client.config.channel)
-    let channel2 = client.channels.cache.get(client.config.channel2)
-    client.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${client.config.channel_id3}`)
-    .then(data => {
-      const fs = require('fs')
+  Jack.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${Jack.config.channel_id2}`)
+  .then(data => {
+    const fs = require('fs')
     fs.readFile('latest_episodes.json', (err, data2) => {
     if (err) throw err
     let episodes = JSON.parse(data2)
-    if(episodes[0]["oth"] != data.items[0].title) {
-      episodes[0]["oth"] = data.items[0].title
+    let episode_title = data.items[0].title
+    let filtered_episode_title = episode_title.replace(/[\W_]/g, '')
+    if(episodes[0]["spill"] != filtered_episode_title) {
+      episodes[0]["spill"] = filtered_episode_title
       let data3 = JSON.stringify(episodes, null, 2);
       fs.writeFile('latest_episodes.json', data3, (err) => {
       if (err) throw err;
-      console.log('oth data written to file');
+      console.log(data3)
+      console.log('Spill data written to file');
 
       let auth = data.items[0].author
       let link = data.items[0].link
       let title = data.items[0].title
 
-      if (!channel || !channel2) {
+      if (!d_channel_1 || !d_channel_1) {
         console.log("no channels to send to")
         return;
       }
 
-      let message = "Huzzah! " + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
+      let random_number = Math.floor(Math.random() * spill_salutations.length)
 
-      channel.send(message)
-      channel2.send(message)
+      let message = spill_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
+
+      Jack.channels.cache.get(d_channel_1).send(message)
+      Jack.channels.cache.get(d_channel_2).send(message)
       console.log(message)
       })
     } else {
-      console.log("repeat OTH episode")
+      console.log("repeat Spill episode")
     }
-    })
-    });
-    handleUploads2()
-  }, client.config.watchInterval);
+  })
+  });
 }
 
-client.on("ready", () => {
-    console.log("Ready!")
-    handleUploads()
-    handleUploads2()
-    handleUploads3()
+// On The Hill
+
+function checkOTH() {
+  console.log("OTH vids")
+  Jack.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${Jack.config.channel_id3}`)
+  .then(data => {
+    const fs = require('fs')
+  fs.readFile('latest_episodes.json', (err, data2) => {
+  if (err) throw err
+  let episodes = JSON.parse(data2)
+  let episode_title = data.items[0].title
+    let filtered_episode_title = episode_title.replace(/[\W_]/g, '')
+    if(episodes[0]["oth"] != filtered_episode_title) {
+      episodes[0]["oth"] = filtered_episode_title
+      let data3 = JSON.stringify(episodes, null, 2);
+      fs.writeFile('latest_episodes.json', data3, (err) => {
+      if (err) throw err;
+      console.log(data3)
+      console.log('OTH data written to file');
+
+    let auth = data.items[0].author
+    let link = data.items[0].link
+    let title = data.items[0].title
+
+    if (!channel || !channel2) {
+      console.log("no channels to send to")
+      return;
+    }
+
+    let random_number = Math.floor(Math.random() * oth_salutations.length)
+
+    let message = oth_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
+
+    Jack.channels.cache.get(d_channel_1).send(message)
+    Jack.channels.cache.get(d_channel_2).send(message)
+    console.log(message)
+    })
+  } else {
+    console.log("repeat OTH episode")
+  }
+  })
+  });
+}
+
+Jack.on("ready", () => {
+  let random_number = Math.floor(Math.random() * brew_salutations.length)
+  console.log("Ready!")
+  cron.schedule('16 * * * *', () => {
+    checkBrew()
+  }
+  )
+  cron.schedule('17 * * * *', () => {
+    checkSpill()
+  }
+  )
+  cron.schedule('18 * * * *', () => {
+    checkOTH()
+  }
+  )
   }
 )
 
-client.login(client.config.token);
+Jack.login(Jack.config.token);
 keepAlive()
