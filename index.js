@@ -20,20 +20,32 @@ const cron = require('node-cron');
 const brew_salutations = [
   "No mystery is to great for this guy! ",
   "Mystery time guys! ",
-  "He's great! "
+  "He's great! ",
+  "He's my best friend! "
 ]
 
 const spill_salutations = [
   "Drama Alert! Drama Alert! ",
   "It's about to get heated! ",
   "Spill knows all the drams. ",
+  "I need a hit of drama! You too? ",
+  "Tik Tok and the party don't stop!",
   "Forget KeemStarr! "
 ]
 
 const oth_salutations = [
   "Yes! ",
+  "The wait is over! Jack is back baby! ",
   "Finally one with ME in it! ",
   "I hope they didn't edit me out again. "
+]
+
+const generic_salutations = [
+  "Let's watch it! ",
+  "This is great! ",
+  "I love being included! ",
+  "Who's got the gluten-free popcorn? ",
+  "Can we play Minecraft after? "
 ]
 
 // Brew
@@ -65,8 +77,9 @@ function checkBrew() {
       }
 
       let random_number = Math.floor(Math.random() * brew_salutations.length)
+      let random_number_2 = Math.floor(Math.random() * generic_salutations.length)
 
-      let message = brew_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
+      let message = brew_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\ " + generic_salutations[random_number_2] + link
       Jack.channels.cache.get(d_channel_1).send(message)
       Jack.channels.cache.get(d_channel_2).send(message)
       console.log(message)
@@ -108,8 +121,9 @@ function checkSpill() {
       }
 
       let random_number = Math.floor(Math.random() * spill_salutations.length)
+      let random_number_2 = Math.floor(Math.random() * generic_salutations.length)
 
-      let message = spill_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
+      let message = spill_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\ " + generic_salutations[random_number_2] + link
 
       Jack.channels.cache.get(d_channel_1).send(message)
       Jack.channels.cache.get(d_channel_2).send(message)
@@ -146,14 +160,15 @@ function checkOTH() {
     let link = data.items[0].link
     let title = data.items[0].title
 
-    if (!channel || !channel2) {
+    if (!d_channel_1 || !d_channel_1) {
       console.log("no channels to send to")
       return;
     }
 
     let random_number = Math.floor(Math.random() * oth_salutations.length)
+    let random_number_2 = Math.floor(Math.random() * generic_salutations.length)
 
-    let message = oth_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\" Let's all watch it now! " + link
+    let message = oth_salutations[random_number] + auth + " has just released a new video called, \"" + title + "\ " + generic_salutations[random_number_2] + link
 
     Jack.channels.cache.get(d_channel_1).send(message)
     Jack.channels.cache.get(d_channel_2).send(message)
@@ -177,7 +192,7 @@ Jack.on("ready", () => {
     checkSpill()
   }
   )
-  cron.schedule('18 * * * *', () => {
+  cron.schedule('27 * * * *', () => {
     checkOTH()
   }
   )
